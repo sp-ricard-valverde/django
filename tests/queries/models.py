@@ -737,3 +737,15 @@ class RelatedIndividual(models.Model):
 
     class Meta:
         db_table = 'RelatedIndividual'
+
+
+class Ticket26434A(models.Model):
+    modelb_fk = models.ForeignKey('Ticket26434B', models.CASCADE)
+    modelc_fk = models.ForeignKey('Ticket26434C', models.CASCADE)
+
+
+class Ticket26434B(models.Model):
+    name = models.CharField(max_length=128)
+
+class Ticket26434C(models.Model):
+    name = models.CharField(max_length=128)

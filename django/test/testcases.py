@@ -1115,6 +1115,15 @@ def skipUnlessAnyDBFeature(*features):
         "Database doesn't support any of the feature(s): %s" % ", ".join(features)
     )
 
+def skipUnlessDBEngine(engine):
+    """
+    Skip a test unless the database engine matches.
+    """
+    return _deferredSkip(
+        lambda: connection.vendor is engine,
+        "Database backend does not match: %s, expected: %s" % (connection.vendor, engine)
+    )
+
 
 class QuietWSGIRequestHandler(WSGIRequestHandler):
     """

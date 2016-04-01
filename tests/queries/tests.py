@@ -8,11 +8,11 @@ from operator import attrgetter
 
 from django.core.exceptions import FieldError
 from django.db import DEFAULT_DB_ALIAS, connection
-from django.db.models import Count, F, Q
+from django.db.models import Count, F, Q, Max
 from django.db.models.sql.constants import LOUTER
 from django.db.models.sql.datastructures import EmptyResultSet
 from django.db.models.sql.where import NothingNode, WhereNode
-from django.test import TestCase, skipUnlessDBFeature
+from django.test import TestCase, skipUnlessDBFeature, skipUnlessDBEngine
 from django.test.utils import CaptureQueriesContext
 from django.utils import six
 from django.utils.six.moves import range
@@ -30,7 +30,8 @@ from .models import (
     RelatedIndividual, RelatedObject, Report, ReservedName, Responsibility,
     School, SharedConnection, SimpleCategory, SingleObject, SpecialCategory,
     Staff, StaffUser, Student, Tag, Task, Ticket21203Child, Ticket21203Parent,
-    Ticket23605A, Ticket23605B, Ticket23605C, TvChef, Valid, X,
+    Ticket23605A, Ticket23605B, Ticket23605C, TvChef, Valid, X, Ticket26434A,
+    Ticket26434B, Ticket26434C
 )
 
 
@@ -3818,3 +3819,51 @@ class Ticket23622Tests(TestCase):
             Ticket23605A.objects.filter(qx),
             [a2], lambda x: x
         )
+
+
+class Ticket26434Tests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        modelb_1 = Ticket26434B.objects.create(
+            name="model_b_01"
+        )
+        modelc_1 = Ticket26434C.objects.create(
+            name="model_c_01"
+        )
+        modelc_2 = Ticket26434C.objects.create(
+            name="model_c_02"
+        )
+        Ticket26434A.objects.create(
+            modelb_fk=modelb_1,
+            modelc_fk=modelc_1
+        )
+        Ticket26434A.objects.create(
+            modelb_fk=modelb_1,
+            modelc_fk=modelc_1
+        )
+        Ticket26434A.objects.create(
+            modelb_fk=modelb_1,
+            modelc_fk=modelc_2
+        )
+        Ticket26434A.objects.create(
+            modelb_fk=modelb_1,
+            modelc_fk=modelc_2
+        )
+
+    @skipUnlessDBEngine("postgresql")
+    def test_ticket_26434_1_column_FAIL(self):
+        q = Ticket26434A.objects.order_by('-id').values_list("modelb_fk__id").annotate(max=Max("id"))
+        self.assertEqual(q.count(), len(q))
+
+    @skipUnlessDBEngine("postgresql")
+    def test_ticket_26434_2_columns_FAIL(self):
+        q = Ticket26434A.objects.order_by('-id').values_list("modelb_fk__id", "modelc_fk__id").annotate(max=Max("id"))
+        self.assertEqual(q.count(), len(q))
+
+    @skipUnlessDBEngine("postgresql")
+    def test_ticket_26434_2_columns_OK(self):
+        q = Ticket26434A.objects.order_by('-id').values_list("modelb_fk__id").annotate(max=Max("id"))
+        self.assertEqual(q.count(), len(q))
+
+        q = Ticket26434A.objects.order_by('-id').values_list("modelb_fk__id", "modelc_fk__id").annotate(max=Max("id"))
+        self.assertEqual(q.count(), len(q))

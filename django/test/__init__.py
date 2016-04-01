@@ -6,6 +6,7 @@ from django.test.client import Client, RequestFactory
 from django.test.testcases import (
     LiveServerTestCase, SimpleTestCase, TestCase, TransactionTestCase,
     skipIfDBFeature, skipUnlessAnyDBFeature, skipUnlessDBFeature,
+    skipUnlessDBEngine,
 )
 from django.test.utils import (
     ignore_warnings, modify_settings, override_settings,
@@ -15,8 +16,9 @@ from django.test.utils import (
 __all__ = [
     'Client', 'RequestFactory', 'TestCase', 'TransactionTestCase',
     'SimpleTestCase', 'LiveServerTestCase', 'skipIfDBFeature',
-    'skipUnlessAnyDBFeature', 'skipUnlessDBFeature', 'ignore_warnings',
-    'modify_settings', 'override_settings', 'override_system_checks', 'tag',
+    'skipUnlessAnyDBFeature', 'skipUnlessDBFeature', 'skipUnlessDBEngine',
+    'ignore_warnings', 'modify_settings', 'override_settings',
+    'override_system_checks', 'tag',
 ]
 
 # To simplify Django's test suite; not meant as a public API
