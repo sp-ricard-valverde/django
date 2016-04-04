@@ -3861,9 +3861,11 @@ class Ticket26434Tests(TestCase):
         self.assertEqual(q.count(), len(q))
 
     @skipUnlessDBEngine("postgresql")
-    def test_ticket_26434_2_columns_OK(self):
+    def test_ticket_26434_concatenation_1_FAIL_1_SUCCESS(self):
         q = Ticket26434A.objects.order_by('-id').values_list("modelb_fk__id").annotate(max=Max("id"))
         self.assertEqual(q.count(), len(q))
-
+        
+        # this assertion is successful even though a new QuerySet is built and according the previous failed tests
+        # is should fail too
         q = Ticket26434A.objects.order_by('-id').values_list("modelb_fk__id", "modelc_fk__id").annotate(max=Max("id"))
         self.assertEqual(q.count(), len(q))
